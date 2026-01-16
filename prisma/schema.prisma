@@ -166,9 +166,9 @@ model UserAnswer {
   id               String      @id @default(cuid())
   isCorrect        Boolean
   attemptId        String
-  attempt          QuizAttempt @relation(fields: [attemptId], references: [id])
+  attempt          QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   questionId       String
-  question         Question    @relation(fields: [questionId], references: [id])
+  question         Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   selectedOptionId String
   selectedOption   Option      @relation(fields: [selectedOptionId], references: [id])
 }
