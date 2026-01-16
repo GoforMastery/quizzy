@@ -163,12 +163,12 @@ model QuizAttempt {
 }
 
 model UserAnswer {
-  id              String      @id @default(cuid())
-  isCorrect       Boolean
-  attemptId       String
-  attempt         QuizAttempt @relation(fields: [attemptId], references: [id])
-  questionId      String
-  question        Question    @relation(fields: [questionId], references: [id])
-  selectedOptioId String
-  selectedOption  Option      @relation(fields: [selectedOptioId], references: [id])
+  id               String      @id @default(cuid())
+  isCorrect        Boolean
+  attemptId        String
+  attempt          QuizAttempt @relation(fields: [attemptId], references: [id])
+  questionId       String
+  question         Question    @relation(fields: [questionId], references: [id])
+  selectedOptionId String
+  selectedOption   Option      @relation(fields: [selectedOptionId], references: [id])
 }
