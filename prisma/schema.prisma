@@ -14,16 +14,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String        @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   sessions      Session[]
   accounts      Account[]
-  notes         Note[]
+  quizAttempts  QuizAttempt[]
 
   @@unique([email])
   @@map("user")
@@ -77,13 +77,98 @@ model Verification {
   @@map("verification")
 }
 
-model Note {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String
-  @@unique([title, authorId])
+/**
+ * this schema is just for knowing
+ */
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Category {
+  SCIENCE
+  MATHEMATICS
+  HISTORY
+  LITERATURE
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+}
+
+model Quiz {
+  id            String        @id @default(cuid())
+  title         String
+  description   String?
+  questionCount Int
+  timeLimit     Int
+  difficulty    Difficulty
+  category      Category
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  externalId    String?       @unique
+  questions     Question[]
+  quizAttempts  QuizAttempt[]
+
+  @@map("quiz")
+}
+
+// what onDelete cascade does is that when quiz is deleted all the questions related to that quiz will be deleted as well
+// @@index on foreign key fields to improve query performance
+model Question {
+  id          String       @id @default(cuid())
+  text        String
+  type        QuestionType
+  quizId      String
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options     Option[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userAnswers UserAnswer[]
+
+  @@index([quizId])
+  @@map("question")
+}
+
+model Option {
+  id          String       @id @default(cuid())
+  text        String
+  isCorrect   Boolean      @default(false)
+  question    Question     @relation(fields: [questionId], references: [id])
+  questionId  String
+  userAnswers UserAnswer[]
+
+  @@index([questionId])
+  @@map("option")
+}
+
+// to know user progress
+model QuizAttempt {
+  id          String       @id @default(cuid())
+  score       Int?
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+  // junction b/w user and quiz
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userAnswers UserAnswer[]
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempt")
+}
+
+model UserAnswer {
+  id              String      @id @default(cuid())
+  isCorrect       Boolean
+  attemptId       String
+  attempt         QuizAttempt @relation(fields: [attemptId], references: [id])
+  questionId      String
+  question        Question    @relation(fields: [questionId], references: [id])
+  selectedOptioId String
+  selectedOption  Option      @relation(fields: [selectedOptioId], references: [id])
 }
