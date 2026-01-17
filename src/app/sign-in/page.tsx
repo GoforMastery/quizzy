@@ -30,7 +30,7 @@ export default function SignInPage() {
     if (res.error) {
       setError(res.error.message || 'Something went wrong.');
     } else {
-      router.push('/dashboard');
+      router.push('/quizzes');
     }
   }
   return (
