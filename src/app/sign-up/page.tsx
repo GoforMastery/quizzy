@@ -37,7 +37,7 @@ export default function SignUpPage() {
     if (res.error) {
       setError(res.error.message || 'An error occurred');
     } else {
-      router.push('/dashboard');
+      router.push('/quizzes');
     }
   }
   return (
