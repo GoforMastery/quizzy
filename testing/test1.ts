@@ -6,5 +6,6 @@ async function fetchData(url: string) {
   //   console.log(jsonData);
   console.log(jsonData.results);
   // this is results array......
+  // and each individual result is an object {type, difficulty, category, question, correct_answer, incorrect_answers}
 }
 fetchData(QUIZ_URL);

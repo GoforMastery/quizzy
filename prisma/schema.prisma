@@ -86,12 +86,7 @@ enum Difficulty {
   HARD
 }
 
-enum Category {
-  SCIENCE
-  MATHEMATICS
-  HISTORY
-  LITERATURE
-}
+// Category is now a String to support all Open Trivia DB categories
 
 enum QuestionType {
   MULTIPLE_CHOICE
@@ -105,7 +100,7 @@ model Quiz {
   questionCount Int
   timeLimit     Int
   difficulty    Difficulty
-  category      Category
+  category      String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   externalId    String?       @unique
@@ -127,6 +122,8 @@ model Question {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   userAnswers UserAnswer[]
+  difficulty  Difficulty
+  category    String
 
   @@index([quizId])
   @@map("question")
@@ -171,4 +168,104 @@ model UserAnswer {
   question         Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   selectedOptionId String
   selectedOption   Option      @relation(fields: [selectedOptionId], references: [id])
+
+  @@index([attemptId])
+  @@map("user_answer")
 }
+
+/**
+ * ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ * │                                           AUTHENTICATION DOMAIN                                              │
+ * ├─────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ * │                                                                                                              │
+ * │  ┌─────────────────────────┐         ┌─────────────────────────┐         ┌─────────────────────────┐        │
+ * │  │         User            │         │        Session          │         │        Account          │        │
+ * │  ├─────────────────────────┤         ├─────────────────────────┤         ├─────────────────────────┤        │
+ * │  │ id            String PK │◄────────┤ userId        String FK │         │ id            String PK │        │
+ * │  │ name          String    │         │ id            String PK │         │ accountId     String    │        │
+ * │  │ email         String UK │         │ expiresAt     DateTime  │         │ providerId    String    │        │
+ * │  │ emailVerified Boolean   │         │ token         String UK │         │ userId        String FK │────────┼───┐
+ * │  │ image         String?   │         │ createdAt     DateTime  │         │ accessToken   String?   │        │   │
+ * │  │ createdAt     DateTime  │         │ updatedAt     DateTime  │         │ refreshToken  String?   │        │   │
+ * │  │ updatedAt     DateTime  │         │ ipAddress     String?   │         │ idToken       String?   │        │   │
+ * │  └─────────────────────────┘         │ userAgent     String?   │         │ accessTokenExpiresAt    │        │   │
+ * │            │                         └─────────────────────────┘         │ refreshTokenExpiresAt   │        │   │
+ * │            │                                                             │ scope         String?   │        │   │
+ * │            │                                                             │ password      String?   │        │   │
+ * │            │                                                             │ createdAt     DateTime  │        │   │
+ * │            │                                                             │ updatedAt     DateTime  │        │   │
+ * │            │                                                             └─────────────────────────┘        │   │
+ * │            │                                                                        ▲                       │   │
+ * │            └────────────────────────────────────────────────────────────────────────┘                       │   │
+ * │                                                                                                              │   │
+ * │  ┌─────────────────────────┐                                                                                 │   │
+ * │  │     Verification        │                                                                                 │   │
+ * │  ├─────────────────────────┤                                                                                 │   │
+ * │  │ id            String PK │   (standalone - email/token verification)                                       │   │
+ * │  │ identifier    String IX │                                                                                 │   │
+ * │  │ value         String    │                                                                                 │   │
+ * │  │ expiresAt     DateTime  │                                                                                 │   │
+ * │  │ createdAt     DateTime  │                                                                                 │   │
+ * │  │ updatedAt     DateTime  │                                                                                 │   │
+ * │  └─────────────────────────┘                                                                                 │   │
+ * │                                                                                                              │   │
+ * └──────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───┘
+ * │
+ * ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───┐
+ * │                                              QUIZ DOMAIN                                                     │   │
+ * ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────┤   │
+ * │                                                                                                              │   │
+ * │  ┌─────────────────────────┐         ┌─────────────────────────┐         ┌─────────────────────────┐        │   │
+ * │  │          Quiz           │         │       Question          │         │         Option          │        │   │
+ * │  ├─────────────────────────┤         ├─────────────────────────┤         ├─────────────────────────┤        │   │
+ * │  │ id            String PK │◄────────┤ quizId        String FK │◄────────┤ questionId    String FK │        │   │
+ * │  │ title         String    │         │ id            String PK │         │ id            String PK │        │   │
+ * │  │ description   String?   │         │ text          String    │         │ text          String    │        │   │
+ * │  │ questionCount Int       │         │ type      QuestionType  │         │ isCorrect     Boolean   │        │   │
+ * │  │ timeLimit     Int       │         │ difficulty  Difficulty  │         └─────────────────────────┘        │   │
+ * │  │ difficulty    Difficulty│         │ createdAt     DateTime  │                    │                       │   │
+ * │  │ category      String    │         │ updatedAt     DateTime  │                    │                       │   │
+ * │  │ externalId    String? UK│         └─────────────────────────┘                    │                       │   │
+ * │  │ createdAt     DateTime  │                    │                                   │                       │   │
+ * │  │ updatedAt     DateTime  │                    │                                   │                       │   │
+ * │  └─────────────────────────┘                    │                                   │                       │   │
+ * │            │                                    │                                   │                       │   │
+ * │            │                                    ▼                                   ▼                       │   │
+ * │            │                         ┌─────────────────────────┐                                            │   │
+ * │            │                         │      UserAnswer         │                                            │   │
+ * │            │                         ├─────────────────────────┤                                            │   │
+ * │            │                         │ id               String │                                            │   │
+ * │            │                         │ isCorrect        Boolean│                                            │   │
+ * │            │                         │ attemptId     String FK │───────┐                                    │   │
+ * │            │                         │ questionId    String FK │───────┼─── (to Question)                   │   │
+ * │            │                         │ selectedOptionId    FK  │───────┼─── (to Option)                     │   │
+ * │            │                         └─────────────────────────┘       │                                    │   │
+ * │            │                                    ▲                      │                                    │   │
+ * │            ▼                                    │                      │                                    │   │
+ * │  ┌─────────────────────────┐                    │                      │                                    │   │
+ * │  │      QuizAttempt        │────────────────────┘                      │                                    │   │
+ * │  ├─────────────────────────┤                                           │                                    │   │
+ * │  │ id            String PK │                                           │                                    │   │
+ * │  │ score         Int?      │                                           │                                    │   │
+ * │  │ startedAt     DateTime  │◄──────────────────────────────────────────┘                                    │   │
+ * │  │ completedAt   DateTime? │                                                                                │   │
+ * │  │ userId        String FK │────────────────────────────────────────────────────────────────────────────────┼───┘
+ * │  │ quizId        String FK │─────┐                                                                          │
+ * │  └─────────────────────────┘     │                                                                          │
+ * │            ▲                     │                                                                          │
+ * │            └─────────────────────┘ (to Quiz)                                                                │
+ * │                                                                                                              │
+ * └──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ * ┌─────────────────────────┐
+ * │         ENUMS           │
+ * ├─────────────────────────┤
+ * │ Difficulty:             │
+ * │   • EASY                │
+ * │   • MEDIUM              │
+ * │   • HARD                │
+ * ├─────────────────────────┤
+ * │ QuestionType:           │
+ * │   • MULTIPLE_CHOICE     │
+ * │   • TRUE_FALSE          │
+ * └─────────────────────────┘
+ */

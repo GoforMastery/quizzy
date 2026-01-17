@@ -1,0 +1,92 @@
+// server actions
+'use server';
+import prisma from '@/lib/prisma';
+import { createQuizSchema, type CreateQuiz } from '../lib/schemas/quiz';
+
+export default async function createQuiz(data: CreateQuiz) {
+  const validatedData = createQuizSchema.safeParse(data);
+  if (!validatedData.success) {
+    throw new Error('Invalid quiz data');
+  }
+  // proceed to create quiz in the database
+  // zod returns the validated data in the .data property
+  const {
+    title,
+    description,
+    questionCount,
+    timeLimit,
+    difficulty,
+    category,
+    externalId,
+    questions,
+  } = validatedData.data;
+  await prisma.quiz.create({
+    data: {
+      title,
+      description,
+      questionCount,
+      timeLimit,
+      difficulty,
+      category,
+      externalId,
+      questions: {
+        // nest create for questions and options
+        create: questions.map((question) => {
+          return {
+            text: question.text,
+            type: question.type,
+            difficulty: question.difficulty,
+            category: category,
+            options: {
+              create: question.options.map((option) => {
+                return {
+                  text: option.text,
+                  isCorrect: option.isCorrect,
+                };
+              }),
+            },
+          };
+        }),
+      },
+    },
+  });
+}
+
+/**
+ * Get all quizzes for the dashboard
+ * Supports optional filtering by difficulty and category
+ */
+export async function getQuizzes(filters?: {
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  category?: string;
+}) {
+  const filterDifficulty = filters?.difficulty;
+  const filterCategory = filters?.category;
+  const quizzes = await prisma.quiz.findMany({
+    where: {
+      difficulty: filterDifficulty,
+      category: filterCategory,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  console.log('Fetched quizzes:', quizzes.length);
+  return quizzes;
+}
+
+/**
+ * Get a single quiz by its ID, including questions and options
+ * @param quizId - the ID of the quiz to retrieve
+ * @return the quiz with its questions and options
+ **/
+export async function getQuizById(quizId: string) {
+  return await prisma.quiz.findUnique({
+    where: { id: quizId },
+    include: {
+      questions: {
+        include: {
+          options: true,
+        },
+      },
+    },
+  });
+}
