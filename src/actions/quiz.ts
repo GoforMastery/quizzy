@@ -79,7 +79,7 @@ export async function getQuizzes(filters?: {
  * @return the quiz with its questions and options
  **/
 export async function getQuizById(quizId: string) {
-  return await prisma.quiz.findUnique({
+  const quiz = await prisma.quiz.findUnique({
     where: { id: quizId },
     include: {
       questions: {
@@ -89,4 +89,6 @@ export async function getQuizById(quizId: string) {
       },
     },
   });
+
+  return quiz;
 }

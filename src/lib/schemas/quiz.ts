@@ -44,6 +44,8 @@ export const createQuizSchema = z.object({
   questions: z.array(createQuestionSchema).min(1, 'Quiz must have at least 1 question.'),
 });
 
+export const quizIdSchema = z.string().cuid();
+
 // export types
 
 export type OpenTriviaQuestion = z.infer<typeof OpenTriviaQuestionSchema>;
@@ -51,3 +53,4 @@ export type OpenTriviaResponse = z.infer<typeof OpenTriviaResponseSchema>;
 export type CreateOption = z.infer<typeof createOptionSchema>;
 export type CreateQuestion = z.infer<typeof createQuestionSchema>;
 export type CreateQuiz = z.infer<typeof createQuizSchema>;
+export type QuizId = z.infer<typeof quizIdSchema>;

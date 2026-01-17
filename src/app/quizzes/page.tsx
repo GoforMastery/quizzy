@@ -24,7 +24,7 @@ export default async function DashboardPage() {
                 key={quiz.id}
                 className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="flex justify-between items-between gap-4">
+                <div className="flex justify-between items-between gap-4 flex-wrap">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h2 className="text-lg font-medium text-slate-800">{quiz.title}</h2>
