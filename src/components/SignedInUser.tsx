@@ -1,15 +1,15 @@
 'use client';
-import { authClient } from '@/lib/auth-client';
+import { useUser } from '@clerk/nextjs';
 import { Button } from './ui/button';
 
 export default function SignedInUser() {
-  const { data: session, isPending } = authClient.useSession();
+  const { user, isLoaded } = useUser();
 
-  if (isPending) {
+  if (!isLoaded) {
     return <div className="flex flex-col justify-center items-center">Loading...</div>;
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border shadow-lg p-6 max-w-sm mx-auto my-8">
         <p className="text-center text-gray-700">You are not signed in.</p>
@@ -22,8 +22,8 @@ export default function SignedInUser() {
 
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border shadow-lg p-6 max-w-sm mx-auto my-8">
-      <h1 className="text-xl font-semibold text-center mb-4">Welcome, {session.user.name}!</h1>
-      <p className="text-center text-gray-600">You are signed in as {session.user.email}.</p>
+      <h1 className="text-xl font-semibold text-center mb-4">Welcome, {user.firstName || user.emailAddresses[0]?.emailAddress}!</h1>
+      <p className="text-center text-gray-600">You are signed in as {user.emailAddresses[0]?.emailAddress}.</p>
     </div>
   );
 }

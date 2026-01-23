@@ -1,5 +1,4 @@
 import { getQuizzes } from '@/actions/quiz';
-import Logout from '@/components/LogOut';
 import Link from 'next/link';
 import SignedInUser from '@/components/SignedInUser';
 
@@ -11,7 +10,6 @@ const difficultyColors = {
 
 export default async function DashboardPage() {
   const quizzes = await getQuizzes();
-  // signout this is going to be async because of external dependency
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="max-w-5xl mx-auto px-6 py-12">
@@ -59,9 +57,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
-        {/* this below logout is client component imported in this server component */}
         <SignedInUser />
-        <Logout />
       </div>
     </main>
   );

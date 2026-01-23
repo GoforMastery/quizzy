@@ -1,6 +1,5 @@
 'use client';
 import { savequizAttempt } from '@/actions/quiz';
-import { getSession } from '@/lib/auth-client';
 import { Quiz } from '@/lib/types/quiz';
 import he from 'he';
 import { useMemo, useState } from 'react';
@@ -18,7 +17,6 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
   const [selections, setSelections] = useState<Record<number, number>>({});
   const [isSubmitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
-  const [debug, setDebug] = useState<string | null>(null);
   const correctAns = useMemo(() => {
     return quiz.questions.map((question) => {
       return question.options
@@ -66,8 +64,6 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
         score: calculatedScore,
         userAnswers,
       });
-      const session = await getSession();
-      setDebug(session.data?.user?.email);
     } catch (error) {
       console.error('Failed to save quiz attempt:', error);
     }
@@ -75,7 +71,6 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
   const allAnswered = Object.keys(selections).length === quiz.questions.length;
   return (
     <div className="bg-white max-w-2xl mx-auto p-6">
-      <div>Testing: {}</div>
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-2 text-slate-800">{quiz.title}</h1>
         <p className="text-slate-500 mb-6">{quiz.questions.length} questions</p>

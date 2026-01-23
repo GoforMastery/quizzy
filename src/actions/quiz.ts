@@ -1,8 +1,7 @@
 // server actions
 'use server';
-import { auth } from '@/lib/auth';
+import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
-import { headers } from 'next/headers';
 import {
   createQuizSchema,
   QuizAttemptInput,
@@ -109,8 +108,8 @@ export async function getQuizById(quizId: string) {
 // we need to validate it
 export async function savequizAttempt(data: QuizAttemptInput) {
   // first validate it
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user?.id) {
+  const { userId } = await auth();
+  if (!userId) {
     throw new Error('You must be logged in to submit.');
   }
   const validated = quizAttemptSchema.safeParse(data);
@@ -120,7 +119,7 @@ export async function savequizAttempt(data: QuizAttemptInput) {
   const { quizId, score, userAnswers } = validated.data;
   return await prisma.quizAttempt.create({
     data: {
-      userId: session.user.id,
+      userId,
       quizId,
       score,
       userAnswers: {

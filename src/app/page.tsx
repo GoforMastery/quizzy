@@ -1,14 +1,13 @@
 'use client';
 
 import SignedInUser from '@/components/SignedInUser';
-import { authClient } from '@/lib/auth-client';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 
 export default function Home() {
-  const { data: session, isPending } = authClient.useSession();
-  // If session exists → user is signed in
-  // If session is null → user is NOT signed in
-  if (isPending) {
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) {
     return <p className="text-center mt-10">Checking session...</p>;
   }
 
@@ -21,7 +20,7 @@ export default function Home() {
             Test your knowledge with our fun and interactive quizzes. Sign up or sign in to create
             your own quizzes.
           </p>
-          {session ? (
+          {user ? (
             <>
               <SignedInUser />
               <Link href="/quizzes">
@@ -31,11 +30,7 @@ export default function Home() {
               </Link>
             </>
           ) : (
-            <Link href="/sign-in">
-              <button className="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium hover:bg-gray-900 transition">
-                Sign in to continue
-              </button>
-            </Link>
+            <div>Please sign to continue</div>
           )}
         </div>
       </div>
