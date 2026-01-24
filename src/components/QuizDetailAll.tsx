@@ -5,6 +5,7 @@ import he from 'he';
 import { useRouter } from 'next/navigation';
 
 import { useEffect, useMemo, useState } from 'react';
+import ProgressBar from './ProgressBar';
 
 interface QuizDetailProps {
   quiz: Quiz;
@@ -23,8 +24,8 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
   const [timeRemain, setTimeRemain] = useState(quiz.timeLimit);
   const minutes = Math.floor(timeRemain / 60);
   const seconds = timeRemain % 60;
-
   const router = useRouter();
+  const solved = Object.keys(selections).length;
   const correctAns = useMemo(() => {
     return quiz.questions.map((question) => {
       return question.options
@@ -34,6 +35,8 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
   }, [quiz.questions]);
   function handleSelect(questionIdx: number, optionIdx: number) {
     if (isSubmitted) return;
+    console.log(selections);
+
     setSelections((prev) => ({ ...prev, [questionIdx]: optionIdx }));
   }
   async function handleSubmit() {
@@ -84,6 +87,7 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
         userAnswers,
       });
       const attemptId = attempt.id;
+      // after saving to db now route....
       if (attemptId) {
         router.push(`/quiz/${quiz.id}/results/${attemptId}`);
       }
@@ -113,10 +117,14 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
       handleSubmit();
     }
   }, [timeRemain, isSubmitted]);
+
   return (
-    <div className="bg-white max-w-2xl mx-auto p-6">
-      <div className="text-center text-2xl font-medium text-gray-700">
+    <div className="min-h-screen bg-slate-50 max-w-2xl mx-auto px-6 py-8">
+      <div className="text-center text-2xl font-semibold text-slate-700 mb-4">
         ⏱ {minutes}:{seconds.toString().padStart(2, '0')}
+      </div>
+      <div className="p-2 flex flex-col justify-center items-center">
+        <ProgressBar solved={solved} total={quiz.questionCount} />
       </div>
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-2 text-slate-800">{quiz.title}</h1>
@@ -137,14 +145,15 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
                     key={option.id}
                     onClick={() => handleSelect(idx, optionIdx)}
                     disabled={isSubmitted}
-                    className={`p-3 text-left rounded-md border-2 transition-all
+                    className={`p-3 text-left rounded-lg border transition-all
                       ${
                         isSelected
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                          ? 'border-slate-400 bg-slate-100 text-slate-800'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                       }
-                      ${isSubmitted ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
-                      ${isSubmitted && isSelected ? (option.isCorrect ? 'bg-green-200' : 'bg-red-200') : 'bg-white'}
+                      ${isSubmitted ? 'cursor-not-allowed' : 'cursor-pointer'}
+                      ${isSubmitted && isSelected ? (option.isCorrect ? 'bg-emerald-100 border-emerald-300' : 'bg-rose-100 border-rose-300') : ''}
+                      ${isSubmitted && !isSelected ? 'opacity-60' : ''}
                     `}
                   >
                     {he.decode(option.text)} {isSelected && <span className="float-right">✓</span>}
@@ -169,7 +178,7 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
           className={`mt-4 w-full py-3 rounded-lg font-medium transition-colors
             ${
               allAnswered
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-slate-800 text-white hover:bg-slate-700'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }
           `}
@@ -177,8 +186,8 @@ export default function QuizDetailAll({ quiz }: QuizDetailProps) {
           Submit Quiz
         </button>
       ) : (
-        <div className="mt-6 p-4 bg-green-50 rounded-lg text-center">
-          <p className="text-green-700 font-bold text-xl">
+        <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
+          <p className="text-emerald-700 font-bold text-xl">
             Score: {score} / {quiz.questions.length}
           </p>
         </div>

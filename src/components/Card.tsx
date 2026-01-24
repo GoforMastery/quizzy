@@ -13,17 +13,17 @@ type CardPropTyes = {
 };
 export default function Card(props: CardPropTyes) {
   return (
-    <ul className="p-2 mb-1 rounded-md space-y-3 hover:shadow-lg">
-      <div>{props.question}</div>
+    <ul className="p-4 mb-4 rounded-lg bg-white border border-slate-200 space-y-2">
+      <div className="text-slate-700 font-medium mb-3">{props.question}</div>
       {props.options.map((option) => (
         <li
           key={option.id}
-          className={`p-2 rounded border-2 ${
+          className={`p-3 rounded-lg border ${
             option.isCorrect
-              ? 'bg-green-100 border-green-500'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
               : option.id === props.selectedOptionId
-                ? 'bg-red-100 border-red-500'
-                : 'bg-gray-50 border-transparent'
+                ? 'bg-rose-50 border-rose-300 text-rose-800'
+                : 'bg-slate-50 border-slate-200 text-slate-600'
           }`}
         >
           <div className="flex justify-between">
