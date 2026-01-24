@@ -1,6 +1,7 @@
 import he from 'he';
 type Option = {
   id: string;
+  // each option has id.
   text: string;
   isCorrect: boolean;
 };
@@ -8,10 +9,11 @@ type CardPropTyes = {
   question: string;
   options: Option[];
   selectedOptionId: string;
+  // this is selected by user
 };
 export default function Card(props: CardPropTyes) {
   return (
-    <ul className="p-2 mb-1 border-2 border-black rounded-md space-y-3 hover:shadow-lg">
+    <ul className="p-2 mb-1 rounded-md space-y-3 hover:shadow-lg">
       <div>{props.question}</div>
       {props.options.map((option) => (
         <li
