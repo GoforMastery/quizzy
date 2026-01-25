@@ -40,6 +40,9 @@ export default async function Dashboard() {
                 <span className="block text-sm text-gray-500" style={{ fontFamily: font }}>
                   {attempt.quiz.timeLimit} seconds.
                 </span>
+                <span className="block text-md font-bold">
+                  {attempt.startedAt.toLocaleString()}
+                </span>
                 Score: {attempt.score} / {attempt.quiz.questionCount}
               </li>
             ))}

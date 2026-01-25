@@ -78,7 +78,6 @@ export async function getQuizzes(filters?: {
     },
     orderBy: { createdAt: 'desc' },
   });
-  console.log('Fetched quizzes:', quizzes.length);
   return quizzes;
 }
 
@@ -149,6 +148,7 @@ export async function savequizAttempt(data: QuizAttemptInput) {
       userId,
       quizId,
       score,
+      completedAt: new Date(),
       userAnswers: {
         create: userAnswers.map((answer) => ({
           questionId: answer.questionId,
