@@ -1,0 +1,1 @@
+The current issue is that users can only see the time for North Virginia because of the database structure. To resolve this, we can add a time-based field to the database that is based on the user's country, which will allow users to see the time in their local timezone.
